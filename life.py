@@ -98,6 +98,7 @@ def get_game_mode() -> str:
 def next_board_state(state: list, game_mode: str) -> list:
     game_mode_funcs = {
         'normal': next_board_state_normal,
+        'neumann': next_board_state_neumann
     }
     
     return game_mode_funcs[game_mode](state)
@@ -114,6 +115,29 @@ def next_board_state_normal(state: list) -> list:
             for dy in (-1, 0, 1):
                 for dx in (-1, 0, 1):
                     if dx == 0 and dy == 0:
+                        continue
+                    ni, nj = i + dy, j + dx
+                    if 0 <= ni < rows and 0 <= nj < cols:
+                        neighbors += state[ni][nj]
+
+            if state[i][j] == ALIVE:
+                new_state[i][j] = ALIVE if 2 <= neighbors <= 3 else DEAD
+            if state[i][j] == DEAD:
+                new_state[i][j] = ALIVE if neighbors == 3 else DEAD
+                
+    return new_state
+
+def next_board_state_neumann(state: list) -> list:
+    rows = len(state)
+    cols = len(state[0])
+    new_state = dead_state(cols, rows)
+    
+    for i in range(rows):
+        for j in range(cols):
+            neighbors = 0
+            for dy in range(-2, 3):
+                for dx in range(-2, 3):
+                    if (dx == 0 and dy == 0) or (dx != 0 and dy != 0):
                         continue
                     ni, nj = i + dy, j + dx
                     if 0 <= ni < rows and 0 <= nj < cols:
