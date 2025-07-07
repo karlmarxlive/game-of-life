@@ -74,7 +74,7 @@ def get_game_mode() -> str:
     ]
     
     game_modes_description = """normal - using standard Conway's Game of Life.
-              neumann - using extended Von Neumann Neighborhood.
+              neumann - using extended Von Neumann Neighborhood with r = 2.
               no-death - living cells cannot die.
               walking-dead - dead cells have 20% chance to become living each round.
               zombies - add third type of cell that will wonder and eat its neighbors."""
