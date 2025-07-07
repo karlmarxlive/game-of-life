@@ -46,7 +46,7 @@ def render(state: list) -> None:
                 print('.', end='')
         print('|')
         
-def load_board_state(file_path) -> list:
+def load_board_state(file_path: str) -> list:
     state = []
     
     try:
@@ -64,11 +64,50 @@ def load_board_state(file_path) -> list:
     
     return state
 
-def next_board_state(state: list) -> list:
+def get_game_mode() -> str:
+    available_gamemods = [
+    'normal',
+    'neumann',
+    'no-death',
+    'walking-dead',
+    'zombies'
+    ]
+    
+    game_modes_description = """normal - using standard Conway's Game of Life.
+              neumann - using extended Von Neumann Neighborhood.
+              no-death - living cells cannot die.
+              walking-dead - dead cells have 20% chance to become living each round.
+              zombies - add third type of cell that will wonder and eat its neighbors."""
+    
+    if len(sys.argv) < 3:
+        print('Select in which game mode to start the game:')
+        print(game_modes_description)
+        game_mode = input('Type selected game-mode name: ')
+    else:
+        game_mode = sys.argv[2]
+
+    if game_mode not in available_gamemods:
+        print(f'Game mode "{game_mode}" does not exist.')
+        print('Use: >python life.py pattern.txt game-mode')
+        print('Available game modes:')
+        print(game_modes_description)
+        quit()
+        
+    return game_mode
+
+def next_board_state(state: list, game_mode: str) -> list:
+    game_mode_funcs = {
+        'normal': next_board_state_normal,
+    }
+    
+    return game_mode_funcs[game_mode](state)
+
+
+def next_board_state_normal(state: list) -> list:
     rows = len(state)
     cols = len(state[0])
     new_state = dead_state(cols, rows)
-
+    
     for i in range(rows):
         for j in range(cols):
             neighbors = 0
@@ -84,16 +123,16 @@ def next_board_state(state: list) -> list:
                 new_state[i][j] = ALIVE if 2 <= neighbors <= 3 else DEAD
             if state[i][j] == DEAD:
                 new_state[i][j] = ALIVE if neighbors == 3 else DEAD
-    
+                
     return new_state
 
-
-def main():
+def main() -> None:
     state = get_initial_state()
+    game_mode = get_game_mode()
     while True:
         render(state)
         time.sleep(0.2)
-        state = next_board_state(state)
+        state = next_board_state(state, game_mode)
 
 if __name__ == '__main__':
     main()
