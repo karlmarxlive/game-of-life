@@ -1,5 +1,6 @@
 import random
 import time
+import sys
 
 DEAD = 0
 ALIVE = 1
@@ -23,6 +24,17 @@ def random_state(width: int, height: int) -> list:
                 state[h][w] = DEAD
     return state
 
+def get_initial_state() -> list:
+    if len(sys.argv) < 2:
+        print('Provide path to initial state .txt file or skip to get random initial state.')
+        ans = input()
+        if ans != '':
+            return load_board_state(ans)
+        else:
+            return random_state(10, 10)
+    else:
+        return load_board_state(sys.argv[1])
+
 def render(state: list) -> None:
     print('-' * (len(state[0]) + 2))
     for i in range(len(state)):
@@ -33,6 +45,15 @@ def render(state: list) -> None:
             else:
                 print('.', end='')
         print('|')
+        
+def load_board_state(file_path) -> list:
+    state = []
+    with open(file_path, 'r', encoding='utf-8') as f:
+        lines = f.read().splitlines()
+        for line in lines:
+            state.append(list(map(int, line)))
+    print(state)
+    return state
 
 def next_board_state(state: list) -> list:
     rows = len(state)
@@ -59,9 +80,7 @@ def next_board_state(state: list) -> list:
 
 
 def main():
-    width = 10
-    height = 10
-    state = random_state(width, height)
+    state = get_initial_state()
     while True:
         render(state)
         time.sleep(0.2)
