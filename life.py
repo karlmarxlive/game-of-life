@@ -48,11 +48,20 @@ def render(state: list) -> None:
         
 def load_board_state(file_path) -> list:
     state = []
-    with open(file_path, 'r', encoding='utf-8') as f:
-        lines = f.read().splitlines()
-        for line in lines:
-            state.append(list(map(int, line)))
-    print(state)
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.read().splitlines()
+            for line in lines:
+                state.append(list(map(int, line)))
+    except FileNotFoundError:
+        print(f'File {file_path} was not found.')
+        print('Use: >python life.py pattern.txt game-mode')
+        quit()
+    except IOError:
+        print('An error occurred while reading the file.')
+        quit()
+    
     return state
 
 def next_board_state(state: list) -> list:
