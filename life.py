@@ -37,7 +37,7 @@ def render(state: list) -> None:
 def next_board_state(state: list) -> list:
     rows = len(state)
     cols = len(state[0])
-    new_state = dead_state(rows, cols)
+    new_state = dead_state(cols, rows)
 
     for i in range(rows):
         for j in range(cols):
