@@ -100,6 +100,7 @@ def next_board_state(state: list, game_mode: str) -> list:
         'normal': next_board_state_normal,
         'neumann': next_board_state_neumann,
         'no-death': next_board_state_no_death,
+        'walking-dead': next_board_state_walking_dead,
     }
     
     return game_mode_funcs[game_mode](state)
@@ -171,6 +172,29 @@ def next_board_state_no_death(state: list) -> list:
                 new_state[i][j] = ALIVE
             if state[i][j] == DEAD:
                 new_state[i][j] = ALIVE if neighbors == 3 else DEAD
+                
+    return new_state
+
+def next_board_state_walking_dead(state: list) -> list:
+    rows = len(state)
+    cols = len(state[0])
+    new_state = dead_state(cols, rows)
+    
+    for i in range(rows):
+        for j in range(cols):
+            neighbors = 0
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    if dx == 0 and dy == 0:
+                        continue
+                    ni, nj = i + dy, j + dx
+                    if 0 <= ni < rows and 0 <= nj < cols:
+                        neighbors += state[ni][nj]
+
+            if state[i][j] == ALIVE:
+                new_state[i][j] = ALIVE if 2 <= neighbors <= 3 else DEAD
+            if state[i][j] == DEAD:
+                new_state[i][j] = ALIVE if (neighbors == 3) or (random.random() <= 0.2) else DEAD
                 
     return new_state
 
