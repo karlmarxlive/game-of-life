@@ -4,6 +4,7 @@ import sys
 
 DEAD = 0
 ALIVE = 1
+ZOMBIE = 2
 
 
 def dead_state(width: int, height: int) -> list:
@@ -42,8 +43,10 @@ def render(state: list) -> None:
         for j in range(len(state[i])):
             if state[i][j] == ALIVE:
                 print('#', end='')
-            else:
+            elif state[i][j] == DEAD:
                 print('.', end='')
+            elif state[i][j] == ZOMBIE:
+                print('Z', end='')
         print('|')
         
 def load_board_state(file_path: str) -> list:
@@ -101,6 +104,7 @@ def next_board_state(state: list, game_mode: str) -> list:
         'neumann': next_board_state_neumann,
         'no-death': next_board_state_no_death,
         'walking-dead': next_board_state_walking_dead,
+        'zombies': next_board_state_zombies,
     }
     
     return game_mode_funcs[game_mode](state)
@@ -197,6 +201,82 @@ def next_board_state_walking_dead(state: list) -> list:
                 new_state[i][j] = ALIVE if (neighbors == 3) or (random.random() <= 0.2) else DEAD
                 
     return new_state
+
+def next_board_state_zombies(state: list) -> list:
+    rows = len(state)
+    cols = len(state[0])
+    new_state = dead_state(cols, rows)
+    
+    if is_state_has_zombie(state) == False:
+        state = generate_random_zombie(state)
+        
+    for i in range(rows):
+        for j in range(cols):
+            alive_neighbors = []
+            empty_neighbors = []
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    if dx == 0 and dy == 0:
+                        continue
+                    ni, nj = i + dy, j + dx
+                    if 0 <= ni < rows and 0 <= nj < cols:
+                        if state[ni][nj] == ALIVE:
+                            alive_neighbors.append((ni, nj))
+                        elif state[ni][nj] == DEAD:
+                            empty_neighbors.append((ni, nj))
+
+            if new_state[i][j] != ZOMBIE:
+                if state[i][j] == ALIVE:
+                    new_state[i][j] = ALIVE if 2 <= len(alive_neighbors) <= 3 else DEAD
+                if state[i][j] == DEAD:
+                    new_state[i][j] = ALIVE if len(alive_neighbors) == 3 else DEAD
+                if state[i][j] == ZOMBIE:
+                    if alive_neighbors:
+                        ni, nj = random.choice(alive_neighbors)
+                        new_state[ni][nj] = ZOMBIE
+                        new_state[i][j] = ZOMBIE
+                    elif empty_neighbors:
+                        available_moves = []
+                        for x, y in empty_neighbors:
+                            if new_state[x][y] == DEAD:
+                                available_moves.append((x, y))
+                        if available_moves:
+                            ni, nj = random.choice(available_moves)
+                            new_state[ni][nj] = ZOMBIE
+                            new_state[i][j] = DEAD
+                        else:
+                            new_state[i][j] = ZOMBIE
+                    else:
+                        new_state[i][j] = ZOMBIE
+                
+    return new_state
+
+def generate_random_zombie(state: list) -> list:
+    if is_state_has_zombie(state):
+        return state
+    else:
+        i, j = get_random_dead_cell(state)
+        state[i][j] = ZOMBIE
+        return state
+
+def is_state_has_zombie(state) -> bool:
+    for row in state:
+        if row.count(ZOMBIE) > 0:
+            return True
+    return False
+
+def get_random_dead_cell(state) -> tuple:
+    rows = len(state)
+    cols = len(state[0])
+    
+    dead_cells = []
+    
+    for i in range(rows):
+        for j in range(cols):
+            if state[i][j] == DEAD:
+                dead_cells.append((i, j))
+                
+    return random.choice(dead_cells)
 
 def main() -> None:
     state = get_initial_state()
