@@ -68,7 +68,7 @@ def load_board_state(file_path: str) -> list:
     return state
 
 def get_game_mode() -> str:
-    available_gamemods = [
+    available_game_modes = [
     'normal',
     'neumann',
     'no-death',
@@ -89,7 +89,7 @@ def get_game_mode() -> str:
     else:
         game_mode = sys.argv[2]
 
-    if game_mode not in available_gamemods:
+    if game_mode not in available_game_modes:
         print(f'Game mode "{game_mode}" does not exist.')
         print('Use: >python life.py pattern.txt game-mode')
         print('Available game modes:')
