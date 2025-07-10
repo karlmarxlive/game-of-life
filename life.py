@@ -207,7 +207,7 @@ def next_board_state_zombies(state: list) -> list:
     cols = len(state[0])
     new_state = dead_state(cols, rows)
     
-    if is_state_has_zombie(state) == False:
+    if state_has_zombie(state) == False:
         state = generate_random_zombie(state)
         
     for i in range(rows):
@@ -252,14 +252,14 @@ def next_board_state_zombies(state: list) -> list:
     return new_state
 
 def generate_random_zombie(state: list) -> list:
-    if is_state_has_zombie(state):
+    if state_has_zombie(state):
         return state
     else:
         i, j = get_random_dead_cell(state)
         state[i][j] = ZOMBIE
         return state
 
-def is_state_has_zombie(state) -> bool:
+def state_has_zombie(state) -> bool:
     for row in state:
         if row.count(ZOMBIE) > 0:
             return True
